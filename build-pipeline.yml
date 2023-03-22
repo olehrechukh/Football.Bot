@@ -5,7 +5,7 @@ trigger:
 
 variables:
   solution: '**/*.sln'
-  functionProject: 'Football.Bot'
+  functionProject: 'Footbal.Bot'
 
 steps:
 - task: UseDotNet@2
