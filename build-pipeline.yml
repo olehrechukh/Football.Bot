@@ -17,7 +17,7 @@ steps:
   displayName: 'dotnet build'
   inputs:
     command: 'build'
-    projects: '$(functionProject)/*.csproj'
+    projects: '$(Build.SourcesDirectory)/$(functionProject)/*.csproj'
     arguments: '--configuration Release'
 
 - task: DotNetCoreCLI@2
@@ -25,7 +25,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: '$(functionProject)/*.csproj'
+    projects: '$(Build.SourcesDirectory)/$(functionProject)/*.csproj'
     arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
