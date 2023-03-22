@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footbal.Bot", "Footbal.Bot\Footbal.Bot.csproj", "{2E3EBF0B-C926-479D-B556-4A6723587ECE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8925C8F3-9C9A-4D68-88CE-01B1A8CE09D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Footbal.Bot", "src\Footbal.Bon.AzureFunction\Footbal.Bot.csproj", "{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +10,12 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2E3EBF0B-C926-479D-B556-4A6723587ECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E3EBF0B-C926-479D-B556-4A6723587ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E3EBF0B-C926-479D-B556-4A6723587ECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E3EBF0B-C926-479D-B556-4A6723587ECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295} = {8925C8F3-9C9A-4D68-88CE-01B1A8CE09D0}
 	EndGlobalSection
 EndGlobal
