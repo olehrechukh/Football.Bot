@@ -7,8 +7,6 @@ namespace Football.Bot.Functions;
 
 public class DataUpdaterFunctions
 {
-    private const string Team = "chelsea";
-
     private readonly CosmosDbClient _cosmosDbClient;
     private readonly SchedulerProvider _schedulerProvider;
 
@@ -28,6 +26,6 @@ public class DataUpdaterFunctions
     {
         var matches = await _schedulerProvider.GetNextMatches();
 
-        await _cosmosDbClient.Add(matches, Team);
+        await _cosmosDbClient.Add(matches, Constants.Team);
     }
 }

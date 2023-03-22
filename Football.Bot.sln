@@ -4,6 +4,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8925C8F3-9C9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Bot", "src\Football.Bot.AzureFunction\Football.Bot.csproj", "{AEDA0C42-BBDE-4886-A7B8-9E01F1C7B295}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{B72CEA60-FBB5-431C-9903-064EBCAB3529}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\providers.tf = scripts\providers.tf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

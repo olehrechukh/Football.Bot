@@ -18,7 +18,7 @@ steps:
     projects: '$(Build.SourcesDirectory)/$(functionProject)/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
   displayName: 'Build project'
-- task: DotNetCoreCLI@2
+- task: DotNetCoreCLI@2x`
   inputs:
     command: publish
     arguments: '--configuration $(buildConfiguration) --output publish_output'

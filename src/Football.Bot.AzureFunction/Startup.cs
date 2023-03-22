@@ -28,7 +28,10 @@ public class Startup : FunctionsStartup
             var cosmos = configuration.GetSection("Cosmos").Get<CosmosConfiguration>();
 
             var client = new CosmosClient(accountEndpoint: cosmos.Endpoint, authKeyOrResourceToken: cosmos.Token);
-            var container = client.GetDatabase(cosmos.Database).GetContainer(cosmos.Container);
+            var properties = new ContainerProperties(id: cosmos.Container, partitionKeyPath: Constants.PartitionId);
+
+            var response = client.CreateDatabaseIfNotExistsAsync(cosmos.Database).GetAwaiter().GetResult();
+            var container = response.Database.CreateContainerIfNotExistsAsync(properties).GetAwaiter().GetResult();
 
             return container;
         });

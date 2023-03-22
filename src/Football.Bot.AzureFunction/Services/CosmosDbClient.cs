@@ -12,7 +12,6 @@ public class CosmosDbClient
 {
     private readonly Container _container;
 
-    private const string PartitionId = "61dba35b-4f02-45c5-b648-c6badc0cbd79";
 
     public CosmosDbClient(Container container) => _container = container;
 
@@ -21,7 +20,7 @@ public class CosmosDbClient
         // Create new object and upsert (create or replace) to container
         MathEntity customItem = new(
             id: Guid.NewGuid().ToString(),
-            categoryId: PartitionId,
+            categoryId: Constants.PartitionId,
             numbers: new[] {1, 2, 3},
             matches: matches,
             team: team
@@ -29,7 +28,7 @@ public class CosmosDbClient
 
         MathEntity createdItem = await _container.CreateItemAsync(
             item: customItem,
-            partitionKey: new PartitionKey(PartitionId)
+            partitionKey: new PartitionKey(Constants.PartitionId)
         );
 
         Console.WriteLine($"Created item:\t{createdItem.id}\t[{createdItem.categoryId}]");

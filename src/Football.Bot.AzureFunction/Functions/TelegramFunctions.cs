@@ -20,9 +20,7 @@ public class TelegramFunctions
 {
     private readonly CosmosDbClient _cosmosDbClient;
     private readonly TelegramBotClient _telegramClient;
-
-    private const string Team = "chelsea";
-
+    
     public TelegramFunctions(CosmosDbClient cosmosDbClient, TelegramBotClient telegramClient)
     {
         _cosmosDbClient = cosmosDbClient;
@@ -62,7 +60,7 @@ public class TelegramFunctions
 
     private async Task HandleUpdate(Update update)
     {
-        var matchInfos = await _cosmosDbClient.Get(Team);
+        var matchInfos = await _cosmosDbClient.Get(Constants.Team);
         var now = DateTime.UtcNow;
 
         var matches = matchInfos.OrderBy(info => info.Start)
