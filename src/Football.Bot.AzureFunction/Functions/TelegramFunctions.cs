@@ -57,7 +57,7 @@ public class TelegramFunctions
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
         HttpRequest req, ILogger log)
     {
-        return new OkObjectResult(new {status = "ok", v = 1});
+        return new OkObjectResult(new {status = "ok", v = 1.1});
     }
 
     private async Task HandleUpdate(Update update)
