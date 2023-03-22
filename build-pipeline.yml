@@ -5,7 +5,7 @@ trigger:
 
 variables:
   solution: '**/*.sln'
-  functionProject: 'src/Football.Bot.AzureFunction/Football.Bot.csproj'
+  functionProject: src/Football.Bot.AzureFunction
 
 steps:
 - task: UseDotNet@2
@@ -17,7 +17,7 @@ steps:
   displayName: 'dotnet build'
   inputs:
     command: 'build'
-    projects: '$(functionProject)'
+    projects: '$(functionProject)/*.csproj'
     arguments: '--configuration Release'
 
 - task: DotNetCoreCLI@2
@@ -25,7 +25,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: '$(functionProject)'
+    projects: '$(functionProject)/*.csproj'
     arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
