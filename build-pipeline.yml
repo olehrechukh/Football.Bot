@@ -3,6 +3,10 @@ trigger:
     include:
       - 'master'
 
+variables:
+  solution: '**/*.sln'
+  functionProject: 'src/Football.Bot.AzureFunction'
+
 steps:
 - task: UseDotNet@2
   displayName: Use .NET6 to build
@@ -11,14 +15,14 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '$(Build.SourcesDirectory)/$(project_path)/*.csproj'
+    projects: '$(Build.SourcesDirectory)/$(functionProject)/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
   displayName: 'Build project'
 - task: DotNetCoreCLI@2
   inputs:
     command: publish
     arguments: '--configuration $(buildConfiguration) --output publish_output'
-    projects: '$(Build.SourcesDirectory)/$(project_path)/*.csproj'
+    projects: '$(Build.SourcesDirectory)/$(functionProject)/*.csproj'
     publishWebProjects: false
     modifyOutputPath: false
     zipAfterPublish: false
