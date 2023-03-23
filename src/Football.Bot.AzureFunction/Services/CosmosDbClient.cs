@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Football.Bot.Extensions;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Logging;
 
 // ReSharper disable InconsistentNaming
 
@@ -15,19 +14,16 @@ public class CosmosDbClient
 
     public CosmosDbClient(Container container) => _container = container;
 
-    public async Task Add(MatchInfo[] matches, string team, ILogger logger)
+    public async Task Add(MatchInfo[] matches, string team)
     {
         // Create new object and upsert (create or replace) to container
         MathEntity customItem = new(
             id: Guid.NewGuid().ToString(),
             categoryId: Constants.PartitionId,
-            numbers: new[] {1, 2, 3},
             matches: matches,
             team: team
         );
 
-        logger.LogInformation("Add entity {@val} {container}", customItem, _container?.Id);
-        
         MathEntity createdItem = await _container.CreateItemAsync(
             item: customItem,
             partitionKey: new PartitionKey(Constants.PartitionId)
@@ -49,4 +45,4 @@ public class CosmosDbClient
     }
 }
 
-public record MathEntity(string id, int[] numbers, string categoryId, string team, MatchInfo[] matches);
+public record MathEntity(string id, string categoryId, string team, MatchInfo[] matches);

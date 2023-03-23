@@ -6,7 +6,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Bot", "src\Footbal
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{B72CEA60-FBB5-431C-9903-064EBCAB3529}"
 	ProjectSection(SolutionItems) = preProject
-		scripts\providers.tf = scripts\providers.tf
+		scripts\variables.tf = scripts\variables.tf
+		scripts\outputs.tf = scripts\outputs.tf
+		scripts\main.tf = scripts\main.tf
 	EndProjectSection
 EndProject
 Global

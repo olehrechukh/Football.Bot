@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Football.Bot.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -30,18 +31,20 @@ public class DataUpdaterFunctions
 
         var matches = await _schedulerProvider.GetNextMatches();
 
-        await _cosmosDbClient.Add(matches, Constants.Team, log);
+        await _cosmosDbClient.Add(matches, Constants.Team);
     }
 
     [FunctionName("HttpTimeUpdate")]
-    public async Task HttpTime(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
+    public async Task<IActionResult> HttpTime(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
         HttpRequest req, ILogger log)
     {
         log.LogInformation("HttpTimeUpdate trigger function processed a request");
 
         var matches = await _schedulerProvider.GetNextMatches();
 
-        await _cosmosDbClient.Add(matches, Constants.Team, log);
+        await _cosmosDbClient.Add(matches, Constants.Team);
+
+        return new OkObjectResult(new {status = "ok", v = 1.1});
     }
 }
