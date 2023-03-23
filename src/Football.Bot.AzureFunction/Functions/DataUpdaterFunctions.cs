@@ -26,6 +26,6 @@ public class DataUpdaterFunctions
     {
         var matches = await _schedulerProvider.GetNextMatches();
 
-        await _cosmosDbClient.Add(matches, Constants.Team);
+        await _cosmosDbClient.Add(matches, Constants.Team, log);
     }
 }
