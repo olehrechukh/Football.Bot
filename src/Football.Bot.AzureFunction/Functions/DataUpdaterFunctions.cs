@@ -16,7 +16,7 @@ public class DataUpdaterFunctions
         _schedulerProvider = schedulerProvider;
     }
 
-    // [FunctionName("TimeUpdate")]
+    [FunctionName("TimeUpdate")]
     public async Task RunAsync([TimerTrigger("*/5 * * * * *"
 #if DEBUG
             , RunOnStartup = true
