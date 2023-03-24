@@ -49,15 +49,7 @@ public class TelegramFunctions
 
         return new OkObjectResult("Ok");
     }
-
-    [FunctionName("test")]
-    public IActionResult Test(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
-        HttpRequest req, ILogger log)
-    {
-        return new OkObjectResult(new {status = "ok", v = 1.1});
-    }
-
+    
     private async Task HandleUpdate(Update update)
     {
         var matchInfos = await _cosmosDbClient.Get(Constants.Team);
