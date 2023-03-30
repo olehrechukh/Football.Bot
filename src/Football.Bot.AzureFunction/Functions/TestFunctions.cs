@@ -7,6 +7,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Football.Bot.Functions;
 
+public class TestFunctions1
+{
+    [FunctionName("test")]
+    public IActionResult Test(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
+        HttpRequest req, ILogger log)
+    {
+        return new OkObjectResult(new {status = "ok", v = 1.2});
+    }
+}
 public class TestFunctions
 {
     private readonly IConfiguration _configuration;
