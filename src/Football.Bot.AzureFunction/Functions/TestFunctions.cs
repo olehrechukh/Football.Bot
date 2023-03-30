@@ -9,7 +9,7 @@ namespace Football.Bot.Functions;
 
 public class TestFunctions1
 {
-    [FunctionName("test")]
+    [FunctionName("test1")]
     public IActionResult Test(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
         HttpRequest req, ILogger log)
@@ -17,6 +17,7 @@ public class TestFunctions1
         return new OkObjectResult(new {status = "ok", v = 1.2});
     }
 }
+
 public class TestFunctions
 {
     private readonly IConfiguration _configuration;
