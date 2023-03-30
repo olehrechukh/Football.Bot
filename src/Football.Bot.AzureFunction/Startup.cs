@@ -3,7 +3,10 @@ using Football.Bot;
 using Football.Bot.Services;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 
@@ -47,17 +50,37 @@ public class Startup : FunctionsStartup
         });
     }
 
-    private IConfiguration BuildConfiguration(string applicationRootPath)
+    private static IConfiguration BuildConfiguration(string applicationRootPath)
     {
+        var envConfiguration = GetEnvConfigurationRoot();
+
+        var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
+        var keyVaultClient = GetKeyVaultClient();
+
         var config = new ConfigurationBuilder()
             .SetBasePath(applicationRootPath)
             .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
             .AddJsonFile("settings.json", optional: true, reloadOnChange: true)
             .AddUserSecrets<Startup>()
+            .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager())
             .AddEnvironmentVariables()
             .Build();
 
         return config;
+    }
+
+    private static IConfigurationRoot GetEnvConfigurationRoot() => new ConfigurationBuilder()
+        .AddEnvironmentVariables()
+        .Build();
+
+    private static KeyVaultClient GetKeyVaultClient()
+    {
+        var azureServiceTokenProvider = new AzureServiceTokenProvider();
+
+        // Create a new Key Vault client with Managed Identity authentication
+        var callback = new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback);
+        var keyVaultClient = new KeyVaultClient(callback);
+        return keyVaultClient;
     }
 }
 
