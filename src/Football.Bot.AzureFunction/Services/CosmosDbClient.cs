@@ -38,6 +38,7 @@ public class CosmosDbClient
         var matches = await _container.GetItemLinqQueryable<MathEntity>()
             .Where(entity => entity.team == team)
             .OrderByDescending(entity => entity._ts)
+            .Take(1)
             .ToListAsync();
 
         return matches
