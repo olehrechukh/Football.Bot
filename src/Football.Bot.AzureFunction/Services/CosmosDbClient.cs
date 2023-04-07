@@ -37,6 +37,7 @@ public class CosmosDbClient
         // Point read item from container using the id and partitionKey
         var matches = await _container.GetItemLinqQueryable<MathEntity>()
             .Where(entity => entity.team == team)
+            .OrderByDescending(entity => entity._ts)
             .ToListAsync();
 
         return matches
@@ -45,4 +46,4 @@ public class CosmosDbClient
     }
 }
 
-public record MathEntity(string id, string categoryId, string team, MatchInfo[] matches);
+public record MathEntity(string id, string categoryId, string team, MatchInfo[] matches, long _ts = 0);

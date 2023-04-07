@@ -18,11 +18,13 @@ public class SchedulerProvider
 
     public async Task<MatchInfo[]> GetNextMatches()
     {
-        var response = await _httpClient.GetAsync("https://www.chelseafc.com/en/api/fixtures/upcoming?pageId=30EGwHPO9uwBCc75RQY6kg");
+        var response = await _httpClient.GetAsync(
+            "https://www.chelseafc.com/en/api/fixtures/upcoming?pageId=30EGwHPO9uwBCc75RQY6kg");
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"Failed to retrieve upcoming fixtures from Chelsea API. Status code: {response.StatusCode}");
+            throw new Exception(
+                $"Failed to retrieve upcoming fixtures from Chelsea API. Status code: {response.StatusCode}");
         }
 
         var chelseaMatches = await response.Content.ReadFromJsonAsync<RootObject>();
