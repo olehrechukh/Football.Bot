@@ -1,5 +1,8 @@
 ﻿using System.Net.Http;
 using Football.Bot;
+using Football.Bot.Commands;
+using Football.Bot.Commands.Core;
+using Football.Bot.Functions;
 using Football.Bot.Services;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
@@ -26,6 +29,11 @@ public class Startup : FunctionsStartup
         builder.Services.AddSingleton<CosmosDbClient>();
         builder.Services.AddTransient<CosmosClient>();
 
+        builder.Services.AddTransient<CommandHandler>();
+        builder.Services.AddTransient<ICommand, NextMatchCommand>();
+        builder.Services.AddTransient<ICommand, UnhandledCommand>();
+        
+        
         builder.Services.AddSingleton(_ =>
         {
             var cosmos = configuration.GetSection("Cosmos").Get<CosmosConfiguration>();
@@ -54,15 +62,15 @@ public class Startup : FunctionsStartup
     {
         var envConfiguration = GetEnvConfigurationRoot();
 
-        var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
-        var keyVaultClient = GetKeyVaultClient();
+        // var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
+        // var keyVaultClient = GetKeyVaultClient();
         
         var config = new ConfigurationBuilder()
             .SetBasePath(applicationRootPath)
             .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
             .AddJsonFile("settings.json", optional: true, reloadOnChange: true)
             .AddUserSecrets<Startup>()
-            .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager())
+            // .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager())
             .AddEnvironmentVariables()
             .Build();
 

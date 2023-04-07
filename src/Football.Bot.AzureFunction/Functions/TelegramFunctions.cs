@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
-using Football.Bot.Services;
+using Football.Bot.Commands.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -18,13 +14,11 @@ namespace Football.Bot.Functions;
 
 public class TelegramFunctions
 {
-    private readonly CosmosDbClient _cosmosDbClient;
-    private readonly TelegramBotClient _telegramClient;
-    
-    public TelegramFunctions(CosmosDbClient cosmosDbClient, TelegramBotClient telegramClient)
+    private readonly CommandHandler _commandHandler;
+
+    public TelegramFunctions(CommandHandler commandHandler)
     {
-        _cosmosDbClient = cosmosDbClient;
-        _telegramClient = telegramClient;
+        _commandHandler = commandHandler;
     }
 
     [FunctionName("webhook")]
@@ -42,37 +36,16 @@ public class TelegramFunctions
             return new BadRequestResult();
         }
 
-        if (update.Type == UpdateType.Message)
+        if (update.Type == UpdateType.Message && update.Message?.Type == MessageType.Text)
         {
-            await HandleUpdate(update);
+            await HandleUpdate(update.Message);
         }
 
         return new OkObjectResult("Ok");
     }
-    
-    private async Task HandleUpdate(Update update)
+
+    private async Task HandleUpdate(Message message)
     {
-        var matchInfos = await _cosmosDbClient.Get(Constants.Team);
-        var now = DateTime.UtcNow;
-
-        var matches = matchInfos.OrderBy(info => info.Start)
-            .Where(matchInfo => matchInfo.Start >= now)
-            .Take(3);
-
-        var mathString = DisplayString(matches);
-        var message = $"Next 3 matches{Environment.NewLine}{mathString}";
-
-        await _telegramClient.SendTextMessageAsync(update.Message!.Chat, message);
-    }
-
-    private static string DisplayString(IEnumerable<MatchInfo> matches)
-    {
-        var mathString = string.Join("\r\n", matches.Select(info => info.DisplayTitle + ", " + info.Start));
-        if (string.IsNullOrWhiteSpace(mathString))
-        {
-            mathString = "No matches";
-        }
-
-        return mathString;
+        await _commandHandler.Execute(message);
     }
 }
