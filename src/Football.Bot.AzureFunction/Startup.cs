@@ -62,19 +62,24 @@ public class Startup : FunctionsStartup
     {
         var envConfiguration = GetEnvConfigurationRoot();
 
-        var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
-        var keyVaultClient = GetKeyVaultClient();
-        
-        var config = new ConfigurationBuilder()
+        var builder = new ConfigurationBuilder()
             .SetBasePath(applicationRootPath)
             .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
             .AddJsonFile("settings.json", optional: true, reloadOnChange: true)
-            .AddUserSecrets<Startup>()
-            .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager())
             .AddEnvironmentVariables()
-            .Build();
+            .AddUserSecrets<Startup>();
+        
+        
+        var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
+        if (keyVaultEndpoint != null)
+        {
+            var keyVaultClient = GetKeyVaultClient();
 
-        return config;
+            builder = builder
+                .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
+        }
+        
+        return builder.Build();
     }
 
     private static IConfigurationRoot GetEnvConfigurationRoot() => new ConfigurationBuilder()
