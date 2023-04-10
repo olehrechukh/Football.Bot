@@ -23,7 +23,7 @@ public class WebhookFunctions
 
     [FunctionName("setWebhook")]
     public async Task<IActionResult> HttpTime(
-        [HttpTrigger(AuthorizationLevel.Admin, "get", Route = null)]
+        [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)]
         HttpRequest req, ILogger log)
     {
         var webhookInfo = await _client.GetWebhookInfoAsync();
