@@ -3,6 +3,7 @@ using Football.Bot;
 using Football.Bot.Commands;
 using Football.Bot.Commands.Core;
 using Football.Bot.Functions;
+using Football.Bot.Models;
 using Football.Bot.Services;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
@@ -32,8 +33,8 @@ public class Startup : FunctionsStartup
         builder.Services.AddTransient<CommandHandler>();
         builder.Services.AddTransient<ICommand, NextMatchCommand>();
         builder.Services.AddTransient<ICommand, UnhandledCommand>();
-        
-        
+
+
         builder.Services.AddSingleton(_ =>
         {
             var cosmos = configuration.GetSection("Cosmos").Get<CosmosConfiguration>();
@@ -56,6 +57,9 @@ public class Startup : FunctionsStartup
 
             return telegramClient;
         });
+
+
+        builder.Services.AddTransient(_ => configuration.GetSection("HostInfo").Get<HostInfo>());
     }
 
     private static IConfiguration BuildConfiguration(string applicationRootPath)
@@ -68,8 +72,8 @@ public class Startup : FunctionsStartup
             .AddJsonFile("settings.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables()
             .AddUserSecrets<Startup>();
-        
-        
+
+
         var keyVaultEndpoint = envConfiguration.GetValue<string>("KeyVaultEndpoint");
         if (keyVaultEndpoint != null)
         {
@@ -78,7 +82,7 @@ public class Startup : FunctionsStartup
             builder = builder
                 .AddAzureKeyVault(keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
         }
-        
+
         return builder.Build();
     }
 
@@ -95,12 +99,4 @@ public class Startup : FunctionsStartup
         var keyVaultClient = new KeyVaultClient(callback);
         return keyVaultClient;
     }
-}
-
-public class CosmosConfiguration
-{
-    public string Token { get; set; }
-    public string Endpoint { get; set; }
-    public string Database { get; set; }
-    public string Container { get; set; }
 }

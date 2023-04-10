@@ -19,7 +19,7 @@ public class DataUpdaterFunctions
         _schedulerProvider = schedulerProvider;
     }
 
-    [FunctionName("TimeUpdate")]
+    [FunctionName("scheduleUpdate")]
     public async Task RunAsync([TimerTrigger("0 * * * *"
 #if DEBUG
             , RunOnStartup = true
@@ -34,7 +34,7 @@ public class DataUpdaterFunctions
         await _cosmosDbClient.Add(matches, Constants.Team);
     }
 
-    [FunctionName("HttpTimeUpdate")]
+    [FunctionName("httpScheduleUpdate")]
     public async Task<IActionResult> HttpTime(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]
         HttpRequest req, ILogger log)
