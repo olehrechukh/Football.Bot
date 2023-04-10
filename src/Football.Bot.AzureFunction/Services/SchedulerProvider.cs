@@ -31,7 +31,9 @@ public class SchedulerProvider
 
         var grouped = chelseaMatches.items.SelectMany(x => x.items)
             .GroupBy(match => DateTime.Parse(match.kickoffDate + " " + match.kickoffTime))
-            .SelectMany(items => items.Select(x => DisplayName(x, items.Key))).ToArray();
+            .SelectMany(items => items.Select(x => DisplayName(x, items.Key)))
+            .Select(matchInfo => matchInfo with {Start = matchInfo.Start.ToUniversalTime()})
+            .ToArray();
 
         return grouped;
     }
