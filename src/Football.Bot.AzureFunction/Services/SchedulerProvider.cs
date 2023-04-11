@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Football.Bot.Extensions;
 
 // ReSharper disable InconsistentNaming
 
@@ -30,7 +31,7 @@ public class SchedulerProvider
         var chelseaMatches = await response.Content.ReadFromJsonAsync<RootObject>();
 
         var grouped = chelseaMatches.items.SelectMany(x => x.items)
-            .GroupBy(match => DateTime.Parse(match.kickoffDate + " " + match.kickoffTime))
+            .GroupBy(match => DateTime.Parse(match.kickoffDate + " " + match.kickoffTime).ConvertTimeFromUkToUtc())
             .SelectMany(items => items.Select(match => DisplayName(match, items.Key)))
             .Select(match => match with {Start = match.Start.ToUniversalTime()})
             .ToArray();
@@ -38,7 +39,7 @@ public class SchedulerProvider
         return grouped;
     }
 
-    static MatchInfo DisplayName(MatchItem matchItem, DateTime start)
+    private static MatchInfo DisplayName(MatchItem matchItem, DateTime start)
     {
         var displayTitle = matchItem.matchUp.home.clubName + " - " + matchItem.matchUp.away.clubName;
 

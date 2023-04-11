@@ -9,4 +9,10 @@ public static class DateTimeExtensions
         var uaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("FLE Standard Time");
         return TimeZoneInfo.ConvertTimeFromUtc(dateTime, uaTimeZone);
     }
+    
+    public static DateTime ConvertTimeFromUkToUtc(this DateTime dateTime)
+    {
+        var ukTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+        return TimeZoneInfo.ConvertTimeToUtc(dateTime, ukTimeZone);
+    }
 }
