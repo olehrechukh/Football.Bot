@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System;
 using System.Threading.Tasks;
 using Football.Bot.Commands.Core;
 using Microsoft.AspNetCore.Http;
@@ -22,13 +22,16 @@ public class TelegramFunctions
     }
 
     [FunctionName("webhook")]
-    public async Task<IActionResult> RunAsync(
+    public async Task<IActionResult> Webhook(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
-        HttpRequest req, ILogger log)
+        HttpRequest req,
+        [ServiceBus("pl-queue", Connection = "ServiceBusConnection")]
+        IAsyncCollector<Update> output,
+        ILogger log)
     {
         log.LogInformation("C# HTTP trigger function processed a request");
 
-        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        var requestBody = await req.ReadAsStringAsync();
         var update = JsonConvert.DeserializeObject<Update>(requestBody);
 
         if (update is null)
@@ -38,14 +41,25 @@ public class TelegramFunctions
 
         if (update.Type == UpdateType.Message && update.Message?.Type == MessageType.Text)
         {
-            await HandleUpdate(update.Message);
+            await output.AddAsync(update);
         }
 
         return new OkObjectResult("Ok");
     }
 
-    private async Task HandleUpdate(Message message)
+    [FunctionName("newMessageQueue")]
+    public async Task Run(
+        [ServiceBusTrigger("pl-queue", Connection = "ServiceBusConnection")]
+        Update myQueueItem,
+        Int32 deliveryCount,
+        DateTime enqueuedTimeUtc,
+        string messageId,
+        ILogger log)
     {
-        await _commandHandler.Execute(message);
+        log.LogInformation(
+            "ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}",
+            myQueueItem, enqueuedTimeUtc, deliveryCount, messageId);
+
+        await _commandHandler.Execute(myQueueItem.Message);
     }
 }
