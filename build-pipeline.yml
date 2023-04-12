@@ -6,7 +6,6 @@ trigger:
 pool: Default
 
 variables:
-  solution: '**/*.sln'
   functionProject: 'src/Football.Bot.AzureFunction'
 
 steps:

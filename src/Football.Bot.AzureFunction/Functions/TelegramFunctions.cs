@@ -37,6 +37,7 @@ public class TelegramFunctions
 
         if (MatchSecretValue(req))
         {
+            log.LogError("All headers are {@values}", req.Headers);
             return new StatusCodeResult(401);
         }
         
