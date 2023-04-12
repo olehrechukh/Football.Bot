@@ -50,7 +50,7 @@ public class Startup : FunctionsStartup
 
         builder.Services.AddTransient(serviceProvider =>
         {
-            var token = configuration.GetValue<string>("TelegramToken");
+            var token = serviceProvider.GetRequiredService<TelegramConfiguration>().Token;
             var httpClient = serviceProvider.GetRequiredService<HttpClient>();
 
             var telegramClient = new TelegramBotClient(token, httpClient);
@@ -60,6 +60,7 @@ public class Startup : FunctionsStartup
 
 
         builder.Services.AddTransient(_ => configuration.GetSection("HostInfo").Get<HostInfo>());
+        builder.Services.AddTransient(_ => configuration.GetSection("Telegram").Get<TelegramConfiguration>());
     }
 
     private static IConfiguration BuildConfiguration(string applicationRootPath)

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Football.Bot.Commands.Core;
+using Football.Bot.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -15,10 +17,12 @@ namespace Football.Bot.Functions;
 public class TelegramFunctions
 {
     private readonly CommandHandler _commandHandler;
+    private readonly TelegramConfiguration _telegramConfiguration;
 
-    public TelegramFunctions(CommandHandler commandHandler)
+    public TelegramFunctions(CommandHandler commandHandler, TelegramConfiguration telegramConfiguration)
     {
         _commandHandler = commandHandler;
+        _telegramConfiguration = telegramConfiguration;
     }
 
     [FunctionName("webhook")]
@@ -31,6 +35,11 @@ public class TelegramFunctions
     {
         log.LogInformation("C# HTTP trigger function processed a request");
 
+        if (MatchSecretValue(req))
+        {
+            return new StatusCodeResult(401);
+        }
+        
         var requestBody = await req.ReadAsStringAsync();
         var update = JsonConvert.DeserializeObject<Update>(requestBody);
 
@@ -39,7 +48,7 @@ public class TelegramFunctions
             return new BadRequestResult();
         }
 
-        if (update.Type == UpdateType.Message && update.Message?.Type == MessageType.Text)
+        if (update is {Type: UpdateType.Message, Message.Type: MessageType.Text})
         {
             await output.AddAsync(update);
         }
@@ -47,19 +56,22 @@ public class TelegramFunctions
         return new OkObjectResult("Ok");
     }
 
+
     [FunctionName("newMessageQueue")]
     public async Task Run(
         [ServiceBusTrigger("pl-queue", Connection = "ServiceBusConnection")]
-        Update myQueueItem,
+        Update update,
         Int32 deliveryCount,
         DateTime enqueuedTimeUtc,
         string messageId,
         ILogger log)
     {
-        log.LogInformation(
-            "ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}",
-            myQueueItem, enqueuedTimeUtc, deliveryCount, messageId);
+        log.LogInformation("C# ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}", update, enqueuedTimeUtc, deliveryCount, messageId);
 
-        await _commandHandler.Execute(myQueueItem.Message);
+        await _commandHandler.Execute(update.Message!);
     }
+
+    private bool MatchSecretValue(HttpRequest req) =>
+        req.Headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var headers) &&
+        headers.Contains(_telegramConfiguration.Secret);
 }

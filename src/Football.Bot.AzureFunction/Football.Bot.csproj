@@ -5,6 +5,7 @@
         <AssemblyName>Football.Bot</AssemblyName>
         <RootNamespace>Football.Bot</RootNamespace>
         <UserSecretsId>1306b1fe-8f99-4a04-96ec-4812f5d3c560</UserSecretsId>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
