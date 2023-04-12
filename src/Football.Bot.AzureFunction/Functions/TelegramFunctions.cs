@@ -35,12 +35,11 @@ public class TelegramFunctions
     {
         log.LogInformation("C# HTTP trigger function processed a request");
 
-        if (MatchSecretValue(req))
+        if (!MatchSecretValue(req))
         {
-            log.LogError("All headers are {@values}", req.Headers);
             return new StatusCodeResult(401);
         }
-        
+
         var requestBody = await req.ReadAsStringAsync();
         var update = JsonConvert.DeserializeObject<Update>(requestBody);
 
@@ -67,12 +66,20 @@ public class TelegramFunctions
         string messageId,
         ILogger log)
     {
-        log.LogInformation("C# ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}", update, enqueuedTimeUtc, deliveryCount, messageId);
+        log.LogInformation(
+            "C# ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}",
+            update, enqueuedTimeUtc, deliveryCount, messageId);
 
         await _commandHandler.Execute(update.Message!);
     }
 
     private bool MatchSecretValue(HttpRequest req) =>
-        req.Headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var headers) &&
-        headers.Contains(_telegramConfiguration.Secret);
+        HeadersValidator.MatchSecretValue(req.Headers, _telegramConfiguration.Secret);
+}
+
+public static class HeadersValidator
+{
+    public static bool MatchSecretValue(IHeaderDictionary headers, string secret) =>
+        headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var header) &&
+        header.Contains(secret);
 }
