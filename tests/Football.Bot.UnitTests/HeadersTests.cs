@@ -51,7 +51,7 @@ public class HeadersTests
             ["Accept-Encoding"] = new(new[] {"gzip", "deflate"}),
         });
 
-        var matchSecretValue = HeadersValidator.MatchSecretValue(headers, secret );
+        var matchSecretValue = HeadersValidator.MatchSecretValue(headers, secret);
 
         matchSecretValue.Should().BeFalse();
     }
