@@ -11,40 +11,59 @@ env:
   DOTNET_VERSION: '6.0.x'
   
 jobs:
-  build_test:
+  build:
     runs-on: ubuntu-latest
-
+    environment: dev
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-      - name: Test with dotnet
-        run: dotnet test --logger trx --results-directory "TestResults-'${{ env.DOTNET_VERSION }}'"
-      - name: Upload dotnet test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: dotnet-results-'${{ env.DOTNET_VERSION }}'
-          path: TestResults-'${{ env.DOTNET_VERSION }}'
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
-      - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: bash
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v3
 
-      - name: 'Deploy Azure Functions Action'
+    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --configuration Release --output ./output
+        popd
+
+    - name: Store artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: |
+          '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          
+#    - name: 'Run Azure Functions Action'
+#      uses: Azure/functions-action@v1
+#      id: fa
+#      with:
+#        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+#        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+#        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }} # Remove publish-profile to use Azure RBAC
+  deploy:
+    needs: build_test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, stage]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: |
+            '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Deploy to ${{ matrix.environment }}
         uses: Azure/functions-action@v1
-        id: fa
         with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          app-name: myapp-${{ matrix.environment }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }} # Remove publish-profile to use Azure RBAC
-
