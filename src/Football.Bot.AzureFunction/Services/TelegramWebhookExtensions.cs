@@ -9,7 +9,7 @@ using Telegram.Bot.Types.InputFiles;
 
 namespace Football.Bot.Services;
 
-public static class TelegramExtensions
+public static class TelegramWebhookExtensions
 {
     // NOTE: Telegram.Bot doesnt support secret_token in v18
     // It will implemented in v19 https://github.com/TelegramBots/Telegram.Bot/issues/1109

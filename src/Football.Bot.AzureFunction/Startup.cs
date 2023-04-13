@@ -2,7 +2,6 @@
 using Football.Bot;
 using Football.Bot.Commands;
 using Football.Bot.Commands.Core;
-using Football.Bot.Functions;
 using Football.Bot.Models;
 using Football.Bot.Services;
 using Microsoft.Azure.Cosmos;
@@ -59,7 +58,6 @@ public class Startup : FunctionsStartup
         });
 
 
-        builder.Services.AddTransient(_ => configuration.GetSection("HostInfo").Get<HostInfo>());
         builder.Services.AddTransient(_ => configuration.GetSection("Telegram").Get<TelegramConfiguration>());
     }
 

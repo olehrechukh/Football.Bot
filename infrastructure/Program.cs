@@ -168,12 +168,12 @@ await Pulumi.Deployment.RunAsync(async () =>
     });
     
     // Create Key Vault assigment admin reader for current user 
-    var serviceBusRoleAssignment = new Assignment("801e9dc8-d923-11ed-afa1-0242ac120002", new AssignmentArgs
+    var serviceBusRoleAssignment = new Assignment("801e9dc8-d923-11ed-afa1-0242ac120000", new AssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
         RoleDefinitionId = Roles.ServiceBusOwner,
         Scope = queue.Id,
-        Name = "801e9dc8-d923-11ed-afa1-0242ac120002"
+        Name = "801e9dc8-d923-11ed-afa1-0242ac120000"
     }, new CustomResourceOptions
     {
         DependsOn = {queue, functionApp}
