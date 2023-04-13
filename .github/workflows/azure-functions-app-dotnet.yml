@@ -11,6 +11,29 @@ env:
   DOTNET_VERSION: '6.0.x'
   
 jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test with dotnet
+        run: dotnet test --logger trx --results-directory "TestResults-'${{ env.DOTNET_VERSION }}'"
+      - name: Upload dotnet test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: dotnet-results-'${{ env.DOTNET_VERSION }}'
+          path: TestResults-'${{ env.DOTNET_VERSION }}'
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+        
   build:
     runs-on: ubuntu-latest
     environment: dev
@@ -30,7 +53,7 @@ jobs:
         dotnet build --configuration Release --output ./output
         popd
         
-    - name: 'Run Azure Functions Action'
+    - name: 'Deploy Azure Functions Action'
       uses: Azure/functions-action@v1
       id: fa
       with:
