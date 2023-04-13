@@ -20,7 +20,7 @@ public class SchedulerProvider
 
     public SchedulerProvider(HttpClient httpClient) => _httpClient = httpClient;
 
-    public async Task<MatchInfo[]> GetNextMatches()
+    public async Task<MatchInfo[]> GetNextMatches(int count)
     {
         var response = await _httpClient.GetAsync(
             "https://www.chelseafc.com/en/api/fixtures/upcoming?pageId=30EGwHPO9uwBCc75RQY6kg");
@@ -38,6 +38,7 @@ public class SchedulerProvider
             .GroupBy(match => DateTime.Parse(match.kickoffDate + " " + match.kickoffTime).ConvertTimeFromUkToUtc())
             .SelectMany(items => items.Select(match => DisplayName(match, items.Key)))
             .Select(match => match with {Start = match.Start.ToUniversalTime()})
+            .Take(3)
             .ToArray();
 
         return grouped;

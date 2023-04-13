@@ -11,27 +11,6 @@ using Telegram.Bot.Types.Enums;
 
 namespace Football.Bot.Commands;
 
-internal class UnhandledCommand : ICommand
-{
-    private readonly TelegramBotClient _telegramClient;
-
-    public UnhandledCommand(TelegramBotClient telegramClient)
-    {
-        _telegramClient = telegramClient;
-    }
-
-    public bool CanExecute(Message message)
-    {
-        return true;
-    }
-
-    public async Task Execute(Message message)
-    {
-        const string displayString = "Невідома команда, використай існючу команду або запитай @valdoalvarez";
-        await _telegramClient.SendTextMessageAsync(message.Chat, displayString);
-    }
-}
-
 internal class NextMatchCommand : ICommand
 {
     private const string Pattern = "/next";
@@ -47,8 +26,8 @@ internal class NextMatchCommand : ICommand
 
     public bool CanExecute(Message message)
     {
-        return message?.Text == Pattern // direct message
-               || message?.Chat.Type == ChatType.Group || message?.Text?.StartsWith(Pattern + "@") == true; // message in group
+        return message.Text == Pattern // direct message
+               || message.Chat.Type == ChatType.Group || message.Text?.StartsWith(Pattern + "@") == true; // message in group
     }
 
     public async Task Execute(Message message)

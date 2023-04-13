@@ -20,16 +20,11 @@ public class DataUpdaterFunctions
     }
 
     [FunctionName("scheduleUpdate")]
-    public async Task RunAsync([TimerTrigger("0 * * * *"
-#if DEBUG
-            , RunOnStartup = true
-#endif
-        )]
-        TimerInfo myTimer, ILogger log)
+    public async Task RunAsync([TimerTrigger("0 * * * *", RunOnStartup = true)] TimerInfo myTimer, ILogger log)
     {
         log.LogInformation("TimeUpdate trigger function processed a request");
 
-        var matches = await _schedulerProvider.GetNextMatches();
+        var matches = await _schedulerProvider.GetNextMatches(3);
 
         await _cosmosDbClient.Add(matches, Constants.Team);
     }
@@ -41,7 +36,7 @@ public class DataUpdaterFunctions
     {
         log.LogInformation("HttpTimeUpdate trigger function processed a request");
 
-        var matches = await _schedulerProvider.GetNextMatches();
+        var matches = await _schedulerProvider.GetNextMatches(3);
 
         await _cosmosDbClient.Add(matches, Constants.Team);
 
