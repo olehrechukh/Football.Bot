@@ -1,4 +1,5 @@
-﻿namespace Football.Bot.Models;
+﻿#pragma warning disable CS8618
+namespace Football.Bot.Models;
 
 public class TelegramConfiguration
 {
