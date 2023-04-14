@@ -1,4 +1,4 @@
-name: Deploy DotNet project to Azure Function App
+name: Deploy Azure Function App
 
 on:
   push:
@@ -12,6 +12,7 @@ env:
   
 jobs:
   build:
+    name: Build artifacts
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout GitHub Action'
@@ -29,12 +30,6 @@ jobs:
         dotnet build --configuration Release --output ./output
         popd
 
-    - name: 'Print'
-      shell: bash
-      run: |
-        pwd
-        ls -R
-
     - name: Store artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -42,29 +37,40 @@ jobs:
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output/*'
         if-no-files-found: error  
   
-  deploy:
+  DeployDev:
+    name: Deploy to dev
     needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [dev, stage]
+    environment: dev
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: build-artifacts
-          path: |
-            '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-            
-      - name: 'Print'
-        shell: bash
-        run: |
-          pwd
-          ls -R
+          path: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
           
-      - name: Deploy to ${{ matrix.environment }}
+      - name: Deploy to ${{ env.name }}
         uses: Azure/functions-action@v1
         with:
-          app-name: myapp-${{ matrix.environment }}
+          app-name: football.bot-${{ env.name }}
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          package: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          
+  DeployStage:
+    name: Deploy to staging
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Deploy to ${{ env.name }}
+        uses: Azure/functions-action@v1
+        with:
+          app-name: football.bot-${{ env.name }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          package: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'

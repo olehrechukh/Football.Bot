@@ -1,0 +1,28 @@
+name: Run tests
+
+on: [pull_request]
+
+env:
+  DOTNET_VERSION: '6.0.x'
+  
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Test with dotnet
+        run: dotnet test --logger trx --results-directory "TestResults-'${{ env.DOTNET_VERSION }}'"
+      - name: Upload dotnet test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: dotnet-results-'${{ env.DOTNET_VERSION }}'
+          path: TestResults-'${{ env.DOTNET_VERSION }}'
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
