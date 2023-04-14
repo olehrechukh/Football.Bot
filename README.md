@@ -26,7 +26,7 @@ flowchart TD
 
 ## Architecture
 
-_Add info_
+![Architecture diagram](./.github/images/architecture-diagram.png)
 
 ## Usage
 
