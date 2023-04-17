@@ -117,15 +117,6 @@ await Pulumi.Deployment.RunAsync(async () =>
             Name = Pulumi.AzureNative.Storage.SkuName.Standard_LRS
         }
     });
-    // new 
-    // {
-    //     Name = $"pl{stack}storageaccountpl",
-    //     Location = resourceGroup.Location,
-    //     ResourceGroupName = resourceGroup.Name,
-    //     AccountTier = "Standard",
-    //     AccountReplicationType = "LRS"
-    // }
-    //
 
     // Create an Application insight
     var appInsight = new Component($"pl-{stack}-app-insights", new ComponentArgs
@@ -137,7 +128,7 @@ await Pulumi.Deployment.RunAsync(async () =>
 
 
     // Create an Azure Function app
-    var cosmosDbToken = ListDatabaseAccountKeys.Invoke(new ListDatabaseAccountKeysInvokeArgs()
+    var cosmosDbToken = ListDatabaseAccountKeys.Invoke(new ListDatabaseAccountKeysInvokeArgs
         {
             ResourceGroupName = resourceGroup.Name,
             AccountName = cosmosDbAccount.Name,
@@ -145,6 +136,8 @@ await Pulumi.Deployment.RunAsync(async () =>
         .Apply(result => result.PrimaryMasterKey);
 
     var serviceBusNameSpace = serviceBusNamespace.ServiceBusEndpoint.Apply(s => new Uri(s).Host);
+    var storageConnectionString = StorageConnectionString(resourceGroup, storageAccount);
+
     var functionApp = new WebApp("pl-function-app", new WebAppArgs
     {
         Name = $"pl-{stack}-function-app",
@@ -159,7 +152,6 @@ await Pulumi.Deployment.RunAsync(async () =>
         },
         SiteConfig = new SiteConfigArgs
         {
-            
             AppSettings = new[]
             {
                 new NameValuePairArgs {Name = "FUNCTIONS_EXTENSION_VERSION", Value = "~4"},
@@ -170,41 +162,14 @@ await Pulumi.Deployment.RunAsync(async () =>
                 new NameValuePairArgs {Name = "Cosmos__Endpoint", Value = cosmosDbAccount.DocumentEndpoint},
                 new NameValuePairArgs {Name = "Cosmos__Token", Value = cosmosDbToken},
                 new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Urn},
-                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace}
+                new NameValuePairArgs {Name = "AzureWebJobsStorage", Value = storageConnectionString},
+                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace},
             }
         }
     }, new CustomResourceOptions
     {
         DependsOn = {appInsight, keyVault, cosmosDbAccount, serviceBusNamespace}
     });
-    // var functionApp = new LinuxFunctionApp("pl-function-app", new LinuxFunctionAppArgs
-    // {
-    //     Name = $"pl-{stack}-function-app",
-    //     Location = resourceGroup.Location,
-    //     ResourceGroupName = resourceGroup.Name,
-    //     ServicePlanId = servicePlan.Id,
-    //     StorageAccountName = storageAccount.Name,
-    //     StorageAccountAccessKey = storageAccount.PrimaryAccessKey,
-    //     AppSettings = new InputMap<string>
-    //     {
-    //         {"FUNCTIONS_WORKER_RUNTIME", "dotnet"},
-    //         {"APPINSIGHTS_INSTRUMENTATIONKEY", appInsight.InstrumentationKey},
-    //         {"Cosmos__Container", "matches"},
-    //         {"Cosmos__Database", "football"},
-    //         {"Cosmos__Token", cosmosDbAccount.PrimaryKey},
-    //         {"Cosmos__Endpoint", cosmosDbAccount.Endpoint},
-    //         {"KeyVaultEndpoint", keyVault.VaultUri},
-    //         {"ServiceBusConnection__fullyQualifiedNamespace", serviceBusNamespace.Endpoint.Apply(s => new Uri(s).Host)}
-    //     },
-    //     Identity = new LinuxFunctionAppIdentityArgs
-    //     {
-    //         Type = "SystemAssigned"
-    //     },
-    //     SiteConfig = new LinuxFunctionAppSiteConfigArgs()
-    // }, new CustomResourceOptions
-    // {
-    //     DependsOn = {appInsight, keyVault, cosmosDbAccount, serviceBusNamespace}
-    // });
 
     // Create Key Vault assigment metadata reader for azure function 
     var readerRoleAssignment = new RoleAssignment("4574adae-d926-11ed-afa1-0242ac120002", new RoleAssignmentArgs
@@ -212,7 +177,8 @@ await Pulumi.Deployment.RunAsync(async () =>
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
         RoleDefinitionId = Roles.KeyVaultReader,
         Scope = keyVault.Id,
-        RoleAssignmentName = "4574adae-d926-11ed-afa1-0242ac120002"
+        RoleAssignmentName = "4574adae-d926-11ed-afa1-0242ac120002",
+        PrincipalType = PrincipalType.User
     }, new CustomResourceOptions
     {
         DependsOn = {keyVault, functionApp}
@@ -224,7 +190,8 @@ await Pulumi.Deployment.RunAsync(async () =>
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
         RoleDefinitionId = Roles.KeyVaultSecretsUser,
         Scope = keyVault.Id,
-        RoleAssignmentName = "539cfc2e-d926-11ed-afa1-0242ac120002"
+        RoleAssignmentName = "539cfc2e-d926-11ed-afa1-0242ac120002",
+        PrincipalType = PrincipalType.User
     }, new CustomResourceOptions
     {
         DependsOn = {keyVault, functionApp}
@@ -236,7 +203,8 @@ await Pulumi.Deployment.RunAsync(async () =>
         PrincipalId = current.ObjectId,
         RoleDefinitionId = Roles.KeyVaultAdministrator,
         Scope = keyVault.Id,
-        RoleAssignmentName = "801e9dc8-d923-11ed-afa1-0242ac120002"
+        RoleAssignmentName = "801e9dc8-d923-11ed-afa1-0242ac120002",
+        PrincipalType = PrincipalType.User
     }, new CustomResourceOptions
     {
         DependsOn = {keyVault}
@@ -248,12 +216,13 @@ await Pulumi.Deployment.RunAsync(async () =>
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
         RoleDefinitionId = Roles.ServiceBusOwner,
         Scope = queue.Id,
-        RoleAssignmentName = "801e9dc8-d923-11ed-afa1-0242ac120000"
+        RoleAssignmentName = "801e9dc8-d923-11ed-afa1-0242ac120000",
+        PrincipalType = PrincipalType.User
     }, new CustomResourceOptions
     {
         DependsOn = {queue, functionApp}
     });
-
+    
     return new Dictionary<string, object>
     {
         {"resource_group_name", resourceGroup.Name},
@@ -272,3 +241,15 @@ await Pulumi.Deployment.RunAsync(async () =>
         {"queue_assigment", serviceBusRoleAssignment.Id}
     };
 });
+
+static Output<string> StorageConnectionString(ResourceGroup resourceGroup1, StorageAccount storageAccount1)
+{
+    var accessKey = ListStorageAccountKeys.Invoke(new ListStorageAccountKeysInvokeArgs
+    {
+        ResourceGroupName = resourceGroup1.Name,
+        AccountName = storageAccount1.Name
+    }).Apply(x => x.Keys[0].Value);
+
+    return Output.Format(
+        $"DefaultEndpointsProtocol=https;AccountName={storageAccount1.Name};AccountKey={accessKey};EndpointSuffix=core.windows.net");
+}
