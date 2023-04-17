@@ -9,12 +9,13 @@ using Pulumi.AzureNative.Insights;
 using Pulumi.AzureNative.Resources;
 using Pulumi.AzureNative.Web;
 using Pulumi.AzureNative.Web.Inputs;
+using Pulumi.AzureNative.ServiceBus;
 using Pulumi.AzureNative.Storage;
 using Pulumi.AzureNative.KeyVault;
 using Pulumi.AzureNative.KeyVault.Inputs;
+
 using Kind = Pulumi.AzureNative.Storage.Kind;
 using SkuName = Pulumi.AzureNative.KeyVault.SkuName;
-using Pulumi.AzureNative.ServiceBus;
 
 await Pulumi.Deployment.RunAsync(async () =>
 {
@@ -161,7 +162,7 @@ await Pulumi.Deployment.RunAsync(async () =>
                 new NameValuePairArgs {Name = "Cosmos__Database", Value = "football"},
                 new NameValuePairArgs {Name = "Cosmos__Endpoint", Value = cosmosDbAccount.DocumentEndpoint},
                 new NameValuePairArgs {Name = "Cosmos__Token", Value = cosmosDbToken},
-                new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Urn},
+                new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Properties.Apply(response => response.VaultUri)},
                 new NameValuePairArgs {Name = "AzureWebJobsStorage", Value = storageConnectionString},
                 new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace},
             }
