@@ -11,6 +11,7 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Telegram.Bot;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -31,8 +32,8 @@ public class Startup : FunctionsStartup
 
         builder.Services.AddTransient<CommandHandler>();
         builder.Services.AddTransient<ICommand, NextMatchCommand>();
+        builder.Services.AddTransient<ICommand, StartCommand>();
         builder.Services.AddTransient<ICommand, UnhandledCommand>();
-
 
         builder.Services.AddSingleton(_ =>
         {
