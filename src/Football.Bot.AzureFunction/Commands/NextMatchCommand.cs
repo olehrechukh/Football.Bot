@@ -7,13 +7,12 @@ using Football.Bot.Extensions;
 using Football.Bot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace Football.Bot.Commands;
 
-internal class NextMatchCommand : ICommand
+internal class NextMatchCommand : TextBasedCommand
 {
-    private const string Pattern = "/next";
+    protected override string Pattern => "next";
 
     private readonly CosmosDbClient _cosmosDbClient;
     private readonly TelegramBotClient _telegramClient;
@@ -24,13 +23,7 @@ internal class NextMatchCommand : ICommand
         _telegramClient = telegramClient;
     }
 
-    public bool CanExecute(Message message)
-    {
-        return message.Text == Pattern // direct message
-               || message.Chat.Type == ChatType.Group || message.Text?.StartsWith(Pattern + "@") == true; // message in group
-    }
-
-    public async Task Execute(Message message)
+    public override async Task Execute(Message message)
     {
         var now = DateTime.UtcNow;
         var matchInfos = await _cosmosDbClient.Get(Constants.Team);
@@ -51,7 +44,7 @@ internal class NextMatchCommand : ICommand
             matches.Select(info => info.DisplayTitle + ", " + info.Start.ConvertTimeFromUtcToUa()));
 
         return string.IsNullOrWhiteSpace(mathString)
-            ? "Я не знаю, коли наступний матч, будь ласка, звертайся до @valdoalvarez "
-            : $"Наступні 3 матчі:{Environment.NewLine}{mathString}";
+            ? "Sorry. I don't know when will next next matches"
+            : $"Next 3 matches :{Environment.NewLine}{mathString}";
     }
 }

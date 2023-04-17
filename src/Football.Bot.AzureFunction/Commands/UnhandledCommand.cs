@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Football.Bot.Commands.Core;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -14,14 +15,12 @@ internal class UnhandledCommand : ICommand
         _telegramClient = telegramClient;
     }
 
-    public bool CanExecute(Message message)
-    {
-        return true;
-    }
+    public bool CanExecute(Message message) => true;
 
     public async Task Execute(Message message)
     {
-        const string displayString = "Невідома команда, використай існючу команду або запитай @valdoalvarez";
+        var displayString = $"Unknown command. {Environment.NewLine}. See '/' commands";
+        
         await _telegramClient.SendTextMessageAsync(message.Chat, displayString);
     }
 }
