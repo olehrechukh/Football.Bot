@@ -46,18 +46,18 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: 'Az CLI login'
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - uses: pulumi/actions@v3
-        with:
-          command: up
-          stack-name: org-name/${{ env.name }}
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+#      - name: 'Az CLI login'
+#        uses: azure/login@v1
+#        with:
+#          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+#          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+#          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+#      - uses: pulumi/actions@v3
+#        with:
+#          command: up
+#          stack-name: org-name/${{ env.name }}
+#        env:
+#          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           
       - name: Download artifacts
         uses: actions/download-artifact@v2

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
@@ -16,7 +17,7 @@ public class CommandHandler
 
     public async Task Execute(Message message)
     {
-        if (!IsValidCommand(message.Text))
+        if (!IsValidCommand(message.Text ?? throw new ArgumentNullException(nameof(message.Text))))
         {
             return;
         }
