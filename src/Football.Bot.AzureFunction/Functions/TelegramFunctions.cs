@@ -16,12 +16,12 @@ namespace Football.Bot.Functions;
 
 public class TelegramFunctions
 {
-    private readonly CommandHandler _commandHandler;
+    // private readonly CommandHandler _commandHandler;
     private readonly TelegramConfiguration _telegramConfiguration;
 
-    public TelegramFunctions(CommandHandler commandHandler, TelegramConfiguration telegramConfiguration)
+    public TelegramFunctions(TelegramConfiguration telegramConfiguration)
     {
-        _commandHandler = commandHandler;
+        // _commandHandler = commandHandler;
         _telegramConfiguration = telegramConfiguration;
     }
 
@@ -70,7 +70,12 @@ public class TelegramFunctions
             "C# ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}",
             update, enqueuedTimeUtc, deliveryCount, messageId);
 
-        await _commandHandler.Execute(update.Message!);
+        if (update?.Message?.Text == "fail")
+        {
+            throw new Exception("Custom");
+        }
+        
+        // await _commandHandler.Execute(update.Message!);
     }
 
     private bool MatchSecretValue(HttpRequest req) =>
