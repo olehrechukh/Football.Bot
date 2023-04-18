@@ -16,21 +16,19 @@ namespace Football.Bot.Functions;
 
 public class TelegramFunctions
 {
-    private readonly CommandHandler _commandHandler;
-    private readonly TelegramConfiguration _telegramConfiguration;
+    private readonly CommandHandler commandHandler;
+    private readonly TelegramConfiguration telegramConfiguration;
 
     public TelegramFunctions(TelegramConfiguration telegramConfiguration, CommandHandler commandHandler)
     {
-        _commandHandler = commandHandler;
-        _telegramConfiguration = telegramConfiguration;
+        this.commandHandler = commandHandler;
+        this.telegramConfiguration = telegramConfiguration;
     }
 
     [FunctionName("webhook")]
     public async Task<IActionResult> Webhook(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
-        HttpRequest req,
-        [ServiceBus("pl-queue", Connection = "ServiceBusConnection")]
-        IAsyncCollector<Update> output,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
+        [ServiceBus("pl-queue", Connection = "ServiceBusConnection")] IAsyncCollector<Update> output,
         ILogger log)
     {
         log.LogInformation("C# HTTP trigger function processed a request");
@@ -61,7 +59,7 @@ public class TelegramFunctions
     public async Task Run(
         [ServiceBusTrigger("pl-queue", Connection = "ServiceBusConnection")]
         Update update,
-        Int32 deliveryCount,
+        int deliveryCount,
         DateTime enqueuedTimeUtc,
         string messageId,
         ILogger log)
@@ -70,11 +68,11 @@ public class TelegramFunctions
             "C# ServiceBus queue trigger function processed message: {@myQueueItem}, {enqueuedTimeUtc}, {deliveryCount}, {messageId}",
             update, enqueuedTimeUtc, deliveryCount, messageId);
 
-        await _commandHandler.Execute(update.Message!);
+        await commandHandler.Execute(update.Message!);
     }
 
     private bool MatchSecretValue(HttpRequest req) =>
-        HeadersValidator.MatchSecretValue(req.Headers, _telegramConfiguration.Secret);
+        HeadersValidator.MatchSecretValue(req.Headers, telegramConfiguration.Secret);
 }
 
 public static class HeadersValidator

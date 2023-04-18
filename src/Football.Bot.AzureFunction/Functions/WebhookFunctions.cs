@@ -13,13 +13,13 @@ namespace Football.Bot.Functions;
 
 public class WebhookFunctions
 {
-    private readonly TelegramBotClient _client;
-    private readonly TelegramConfiguration _telegramConfiguration;
+    private readonly TelegramBotClient client;
+    private readonly TelegramConfiguration telegramConfiguration;
 
     public WebhookFunctions(TelegramBotClient client, TelegramConfiguration telegramConfiguration)
     {
-        _client = client;
-        _telegramConfiguration = telegramConfiguration;
+        this.client = client;
+        this.telegramConfiguration = telegramConfiguration;
     }
 
     [FunctionName("setWebhook")]
@@ -27,12 +27,12 @@ public class WebhookFunctions
         [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)]
         HttpRequest req, ILogger log)
     {
-        var webhookInfo = await _client.GetWebhookInfoAsync();
+        var webhookInfo = await client.GetWebhookInfoAsync();
 
         if (!string.IsNullOrWhiteSpace(webhookInfo.Url))
         {
             log.LogInformation("Delete webhook {url}", webhookInfo.Url);
-            await _client.DeleteWebhookAsync();
+            await client.DeleteWebhookAsync();
         }
 
         var uri = ExtractUri(req);
@@ -41,7 +41,7 @@ public class WebhookFunctions
 
 
         // TODO: Replace with native implementation after it has been updated in v19.
-        await _client.SetWebhookWithTokenAsync(uri, secretToken: _telegramConfiguration.Secret);
+        await client.SetWebhookWithTokenAsync(uri, secretToken: telegramConfiguration.Secret);
 
         return new OkObjectResult(new {status = "ok"});
     }

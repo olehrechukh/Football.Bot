@@ -7,13 +7,13 @@ namespace Football.Bot.Functions;
 
 public class DataUpdaterFunctions
 {
-    private readonly CosmosDbClient _cosmosDbClient;
-    private readonly SchedulerProvider _schedulerProvider;
+    private readonly CosmosDbClient cosmosDbClient;
+    private readonly SchedulerProvider schedulerProvider;
 
     public DataUpdaterFunctions(CosmosDbClient cosmosDbClient, SchedulerProvider schedulerProvider)
     {
-        _cosmosDbClient = cosmosDbClient;
-        _schedulerProvider = schedulerProvider;
+        this.cosmosDbClient = cosmosDbClient;
+        this.schedulerProvider = schedulerProvider;
     }
 
     [FunctionName("scheduleUpdate")]
@@ -22,8 +22,8 @@ public class DataUpdaterFunctions
     {
         log.LogInformation("TimeUpdate trigger function processed a request");
 
-        var matches = await _schedulerProvider.GetNextMatches(3);
+        var matches = await schedulerProvider.GetNextMatches(3);
 
-        await _cosmosDbClient.Add(matches, Constants.Team);
+        await cosmosDbClient.Add(matches, Constants.Team);
     }
 }

@@ -14,19 +14,19 @@ internal class NextMatchCommand : TextBasedCommand
 {
     protected override string Pattern => "next";
 
-    private readonly CosmosDbClient _cosmosDbClient;
-    private readonly TelegramBotClient _telegramClient;
+    private readonly CosmosDbClient cosmosDbClient;
+    private readonly TelegramBotClient telegramClient;
 
     public NextMatchCommand(CosmosDbClient cosmosDbClient, TelegramBotClient telegramClient)
     {
-        _cosmosDbClient = cosmosDbClient;
-        _telegramClient = telegramClient;
+        this.cosmosDbClient = cosmosDbClient;
+        this.telegramClient = telegramClient;
     }
 
     public override async Task Execute(Message message)
     {
         var now = DateTime.UtcNow;
-        var matchInfos = await _cosmosDbClient.Get(Constants.Team);
+        var matchInfos = await cosmosDbClient.Get(Constants.Team);
 
         var matches = matchInfos
             .OrderBy(info => info.Start)
@@ -35,7 +35,7 @@ internal class NextMatchCommand : TextBasedCommand
 
         var displayString = DisplayString(matches);
 
-        await _telegramClient.SendTextMessageAsync(message.Chat, displayString);
+        await telegramClient.SendTextMessageAsync(message.Chat, displayString);
     }
 
     private static string DisplayString(IEnumerable<MatchInfo> matches)

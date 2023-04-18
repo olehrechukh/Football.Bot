@@ -8,11 +8,11 @@ namespace Football.Bot.Commands;
 
 internal class UnhandledCommand : ICommand
 {
-    private readonly TelegramBotClient _telegramClient;
+    private readonly TelegramBotClient telegramClient;
 
     public UnhandledCommand(TelegramBotClient telegramClient)
     {
-        _telegramClient = telegramClient;
+        this.telegramClient = telegramClient;
     }
 
     public bool CanExecute(Message message) => true;
@@ -21,6 +21,6 @@ internal class UnhandledCommand : ICommand
     {
         var displayString = $"Unknown command. {Environment.NewLine}. See '/' commands";
         
-        await _telegramClient.SendTextMessageAsync(message.Chat, displayString);
+        await telegramClient.SendTextMessageAsync(message.Chat, displayString);
     }
 }

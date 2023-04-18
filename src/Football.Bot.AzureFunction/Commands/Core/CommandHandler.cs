@@ -8,11 +8,11 @@ namespace Football.Bot.Commands.Core;
 
 public class CommandHandler
 {
-    private readonly IEnumerable<ICommand> _commands;
+    private readonly IEnumerable<ICommand> commands;
 
     public CommandHandler(IEnumerable<ICommand> commands)
     {
-        _commands = commands;
+        this.commands = commands;
     }
 
     public async Task Execute(Message message)
@@ -22,7 +22,7 @@ public class CommandHandler
             return;
         }
 
-        foreach (var command in _commands.Where(command => command.CanExecute(message)))
+        foreach (var command in commands.Where(command => command.CanExecute(message)))
         {
             await command.Execute(message);
             break;
