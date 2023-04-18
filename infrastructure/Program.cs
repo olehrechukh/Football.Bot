@@ -16,6 +16,9 @@ using Pulumi.AzureNative.KeyVault.Inputs;
 
 using Kind = Pulumi.AzureNative.Storage.Kind;
 using SkuName = Pulumi.AzureNative.KeyVault.SkuName;
+using ServiceBus = Pulumi.AzureNative.ServiceBus;
+using Storage = Pulumi.AzureNative.Storage;
+using Web = Pulumi.AzureNative.Web;
 
 await Pulumi.Deployment.RunAsync(async () =>
 {
@@ -30,7 +33,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         ResourceGroupName = $"pl-rg-{stack}"
     });
 
-    // Create a resource group
+    // Create a oosmos db account
     var cosmosDbAccount = new DatabaseAccount($"pl-{stack}-cosmos-db-account", new DatabaseAccountArgs
     {
         AccountName = $"pl-{stack}-cosmos-db-account",
@@ -50,12 +53,12 @@ await Pulumi.Deployment.RunAsync(async () =>
     });
 
     // Create a key vault
-    var keyVault = new Vault($"pl-{stack}-key-vault", new VaultArgs()
+    var keyVault = new Vault($"pl-{stack}-key-vault", new VaultArgs
     {
         Location = resourceGroup.Location,
         ResourceGroupName = resourceGroup.Name,
         VaultName = $"pl-{stack}-key-vault",
-        Properties = new VaultPropertiesArgs()
+        Properties = new VaultPropertiesArgs
         {
             EnabledForDiskEncryption = true,
             EnableRbacAuthorization = true,
@@ -65,8 +68,8 @@ await Pulumi.Deployment.RunAsync(async () =>
             Sku = new SkuArgs
             {
                 Family = "A",
-                Name = SkuName.Standard,
-            },
+                Name = SkuName.Standard
+            }
         }
     });
 
@@ -76,14 +79,14 @@ await Pulumi.Deployment.RunAsync(async () =>
         NamespaceName = $"pl-{stack}-service-bus",
         Location = resourceGroup.Location,
         ResourceGroupName = resourceGroup.Name,
-        Sku = new Pulumi.AzureNative.ServiceBus.Inputs.SBSkuArgs
+        Sku = new ServiceBus.Inputs.SBSkuArgs
         {
-            Name = Pulumi.AzureNative.ServiceBus.SkuName.Standard
-        },
+            Name = ServiceBus.SkuName.Standard
+        }
     });
 
     // Create service bus queue
-    var queue = new Pulumi.AzureNative.ServiceBus.Queue("pl-queue", new Pulumi.AzureNative.ServiceBus.QueueArgs
+    var queue = new ServiceBus.Queue("pl-queue", new ServiceBus.QueueArgs
     {
         NamespaceName = serviceBusNamespace.Name,
         ResourceGroupName = resourceGroup.Name,
@@ -113,15 +116,16 @@ await Pulumi.Deployment.RunAsync(async () =>
         Location = resourceGroup.Location,
         ResourceGroupName = resourceGroup.Name,
         Kind = Kind.Storage,
-        Sku = new Pulumi.AzureNative.Storage.Inputs.SkuArgs
+        Sku = new Storage.Inputs.SkuArgs
         {
-            Name = Pulumi.AzureNative.Storage.SkuName.Standard_LRS
+            Name = Storage.SkuName.Standard_LRS
         }
     });
 
     // Create an Application insight
     var appInsight = new Component($"pl-{stack}-app-insights", new ComponentArgs
     {
+        ResourceName = $"pl-{stack}-app-insights",
         Location = resourceGroup.Location,
         ResourceGroupName = resourceGroup.Name,
         Kind = "web"
@@ -132,7 +136,7 @@ await Pulumi.Deployment.RunAsync(async () =>
     var cosmosDbToken = ListDatabaseAccountKeys.Invoke(new ListDatabaseAccountKeysInvokeArgs
         {
             ResourceGroupName = resourceGroup.Name,
-            AccountName = cosmosDbAccount.Name,
+            AccountName = cosmosDbAccount.Name
         })
         .Apply(result => result.PrimaryMasterKey);
 
@@ -147,9 +151,9 @@ await Pulumi.Deployment.RunAsync(async () =>
         ServerFarmId = servicePlan.Id,
         Kind = "FunctionApp",
         StorageAccountRequired = true,
-        Identity = new Pulumi.AzureNative.Web.Inputs.ManagedServiceIdentityArgs
+        Identity = new Web.Inputs.ManagedServiceIdentityArgs
         {
-            Type = Pulumi.AzureNative.Web.ManagedServiceIdentityType.SystemAssigned
+            Type = Web.ManagedServiceIdentityType.SystemAssigned
         },
         SiteConfig = new SiteConfigArgs
         {
@@ -164,7 +168,7 @@ await Pulumi.Deployment.RunAsync(async () =>
                 new NameValuePairArgs {Name = "Cosmos__Token", Value = cosmosDbToken},
                 new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Properties.Apply(response => response.VaultUri)},
                 new NameValuePairArgs {Name = "AzureWebJobsStorage", Value = storageConnectionString},
-                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace},
+                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace}
             }
         }
     }, new CustomResourceOptions
@@ -243,14 +247,14 @@ await Pulumi.Deployment.RunAsync(async () =>
     };
 });
 
-static Output<string> StorageConnectionString(ResourceGroup resourceGroup1, StorageAccount storageAccount1)
+static Output<string> StorageConnectionString(ResourceGroup resourceGroup, StorageAccount storageAccount)
 {
     var accessKey = ListStorageAccountKeys.Invoke(new ListStorageAccountKeysInvokeArgs
     {
-        ResourceGroupName = resourceGroup1.Name,
-        AccountName = storageAccount1.Name
+        ResourceGroupName = resourceGroup.Name,
+        AccountName = storageAccount.Name
     }).Apply(x => x.Keys[0].Value);
 
     return Output.Format(
-        $"DefaultEndpointsProtocol=https;AccountName={storageAccount1.Name};AccountKey={accessKey};EndpointSuffix=core.windows.net");
+        $"DefaultEndpointsProtocol=https;AccountName={storageAccount.Name};AccountKey={accessKey};EndpointSuffix=core.windows.net");
 }
