@@ -6,10 +6,10 @@ on:
       - master
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'Football.Bot.AzureFunction' 
+  AZURE_FUNCTIONAPP_NAME: 'Football.Bot.AzureFunction'
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/Football.Bot.AzureFunction'
   DOTNET_VERSION: '6.0.x'
-  
+
 jobs:
   build:
     name: Build artifacts
@@ -35,8 +35,8 @@ jobs:
       with:
         name: build-artifacts
         path: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output/*'
-        if-no-files-found: error  
-  
+        if-no-files-found: error
+
   DeployDev:
     name: Deploy to dev
     needs: build
@@ -45,9 +45,6 @@ jobs:
       name: dev
       url: https://t.me/football_serverless_bot
     steps:
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
 #      - name: 'Az CLI login'
 #        uses: azure/login@v1
 #        with:
@@ -60,20 +57,20 @@ jobs:
 #          stack-name: org-name/${{ env.name }}
 #        env:
 #          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: build-artifacts
           path: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+
       - name: Deploy to ${{ env.name }}
         uses: Azure/functions-action@v1
         with:
           app-name: football.bot-${{ env.name }}
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
           package: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+
   DeployStage:
     name: Deploy to staging
     needs: build
