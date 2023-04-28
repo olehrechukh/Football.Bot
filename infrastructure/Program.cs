@@ -143,9 +143,10 @@ await Pulumi.Deployment.RunAsync(async () =>
     var serviceBusNameSpace = serviceBusNamespace.ServiceBusEndpoint.Apply(s => new Uri(s).Host);
     var storageConnectionString = StorageConnectionString(resourceGroup, storageAccount);
 
+    var webAppName = $"pl-{stack}-function-app";
     var functionApp = new WebApp("pl-function-app", new WebAppArgs
     {
-        Name = $"pl-{stack}-function-app",
+        Name = webAppName,
         Location = resourceGroup.Location,
         ResourceGroupName = resourceGroup.Name,
         ServerFarmId = servicePlan.Id,
@@ -168,7 +169,8 @@ await Pulumi.Deployment.RunAsync(async () =>
                 new NameValuePairArgs {Name = "Cosmos__Token", Value = cosmosDbToken},
                 new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Properties.Apply(response => response.VaultUri)},
                 new NameValuePairArgs {Name = "AzureWebJobsStorage", Value = storageConnectionString},
-                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace}
+                new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace},
+                new NameValuePairArgs {Name = "Warmup__Url", Value = $"https://{webAppName}.azurewebsites.net"}
             }
         }
     }, new CustomResourceOptions
@@ -176,7 +178,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {appInsight, keyVault, cosmosDbAccount, serviceBusNamespace}
     });
 
-    // Create Key Vault assigment metadata reader for azure function 
+    // Create Key Vault assigment metadata reader for azure function
     var readerRoleAssignment = new RoleAssignment("4574adae-d926-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -189,7 +191,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault, functionApp}
     });
 
-    // Create Key Vault assigment secret reader for azure function 
+    // Create Key Vault assigment secret reader for azure function
     var secretRoleAssignment = new RoleAssignment("539cfc2e-d926-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -202,7 +204,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault, functionApp}
     });
 
-    // Create Key Vault assigment admin reader for current user 
+    // Create Key Vault assigment admin reader for current user
     var adminRoleAssignment = new RoleAssignment("801e9dc8-d923-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = current.ObjectId,
@@ -215,7 +217,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault}
     });
 
-    // Create Key Vault assigment admin reader for current user 
+    // Create Key Vault assigment admin reader for current user
     var serviceBusRoleAssignment = new RoleAssignment("801e9dc8-d923-11ed-afa1-0242ac120000", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -227,7 +229,7 @@ await Pulumi.Deployment.RunAsync(async () =>
     {
         DependsOn = {queue, functionApp}
     });
-    
+
     return new Dictionary<string, object>
     {
         {"resource_group_name", resourceGroup.Name},

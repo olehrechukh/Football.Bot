@@ -2,6 +2,7 @@
 using Football.Bot;
 using Football.Bot.Commands;
 using Football.Bot.Commands.Core;
+using Football.Bot.Extensions;
 using Football.Bot.Models;
 using Football.Bot.Services;
 using Microsoft.Azure.Cosmos;
@@ -40,12 +41,12 @@ public class Startup : FunctionsStartup
             var cosmos = configuration.GetSection("Cosmos").Get<CosmosConfiguration>();
 
             var client = new CosmosClient(accountEndpoint: cosmos.Endpoint, authKeyOrResourceToken: cosmos.Token);
-            var properties = new ContainerProperties(id: cosmos.Container, partitionKeyPath: "/categoryId");
+            // var properties = new ContainerProperties(id: cosmos.Container, partitionKeyPath: "/categoryId");
 
-            var response = client.CreateDatabaseIfNotExistsAsync(cosmos.Database).GetAwaiter().GetResult();
-            var container = response.Database.CreateContainerIfNotExistsAsync(properties).GetAwaiter().GetResult();
+            var response = client.GetDatabase(cosmos.Database);
+            var container = response.GetContainer(cosmos.Container);
 
-            return container.Container;
+            return container;
         });
 
         builder.Services.AddTransient(serviceProvider =>
@@ -59,7 +60,8 @@ public class Startup : FunctionsStartup
         });
 
 
-        builder.Services.AddTransient(_ => configuration.GetSection("Telegram").Get<TelegramConfiguration>());
+        builder.Services.AddConfigurationModel<TelegramConfiguration>(configuration, "Telegram");
+        builder.Services.AddConfigurationModel<WarmupConfiguration>(configuration, "Warmup");
     }
 
     private static IConfiguration BuildConfiguration(string applicationRootPath)

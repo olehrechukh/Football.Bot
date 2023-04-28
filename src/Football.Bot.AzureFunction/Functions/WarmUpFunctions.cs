@@ -1,41 +1,37 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using Football.Bot.Models;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Football.Bot.Functions;
 
-public static class WarmUpFunctions
+public class WarmUpFunctions
 {
+    private readonly HttpClient httpClient;
+    private readonly WarmupConfiguration configuration;
+
+    public WarmUpFunctions(HttpClient  httpClient, WarmupConfiguration configuration)
+    {
+        this.httpClient = httpClient;
+        this.configuration = configuration;
+    }
+
     [FunctionName("warmup")]
-    public static async Task Warmup(
-        [TimerTrigger("0 */1 * * * *")] TimerInfo timerInfo,
-        HttpClient client,
-        ExecutionContext context,
+    public async Task Warmup(
+        [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
         ILogger log)
     {
-        var functionUrl = $"{context.FunctionAppDirectory}/";
+        var functionUrl = configuration.Url;
+
+        log.LogInformation("Warmup trigger function processed a request");
 
         var request = new HttpRequestMessage(HttpMethod.Get, functionUrl);
-        var response = await client.SendAsync(request);
+        var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
             log.LogError("Function warmup failed with status code {statusCode}", response.StatusCode);
         }
-    }
-
-    [FunctionName("warmup1")]
-    public static async Task<ActionResult> Warmup1(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
-        HttpClient client,
-        ExecutionContext context,
-        ILogger log)
-    {
-        var functionUrl = $"{context.FunctionAppDirectory}/";
-
-        return new OkObjectResult(functionUrl);
     }
 }
