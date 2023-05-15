@@ -23,6 +23,15 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
+    - name: Run tests
+      run: dotnet test --logger trx --results-directory "TestResults-'${{ env.DOTNET_VERSION }}'"
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotnet-results-'${{ env.DOTNET_VERSION }}'
+        path: TestResults-'${{ env.DOTNET_VERSION }}'
+      # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
     - name: 'Resolve Project Dependencies Using Dotnet'
       shell: bash
       run: |
