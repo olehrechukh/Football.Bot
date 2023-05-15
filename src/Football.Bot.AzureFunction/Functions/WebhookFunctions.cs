@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Football.Bot.Extensions;
 using Football.Bot.Models;
 using Football.Bot.Services;
 using Microsoft.AspNetCore.Http;

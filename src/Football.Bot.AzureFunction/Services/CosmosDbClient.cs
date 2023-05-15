@@ -24,12 +24,10 @@ public class CosmosDbClient
             team: team
         );
 
-        MathEntity createdItem = await _container.CreateItemAsync(
+        await _container.UpsertItemAsync(
             item: customItem,
             partitionKey: new PartitionKey(Constants.PartitionId)
         );
-
-        Console.WriteLine($"Created item:\t{createdItem.id}\t[{createdItem.categoryId}]");
     }
 
     public async Task<MatchInfo[]> Get(string team)

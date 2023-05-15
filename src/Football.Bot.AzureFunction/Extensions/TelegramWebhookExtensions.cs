@@ -7,7 +7,7 @@ using Telegram.Bot.Requests;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 
-namespace Football.Bot.Services;
+namespace Football.Bot.Extensions;
 
 public static class TelegramWebhookExtensions
 {

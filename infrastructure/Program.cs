@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Football.Bot.Infrastructure;
 using Pulumi;
@@ -33,7 +33,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         ResourceGroupName = $"pl-rg-{stack}"
     });
 
-    // Create a oosmos db account
+    // Create a cosmos db account
     var cosmosDbAccount = new DatabaseAccount($"pl-{stack}-cosmos-db-account", new DatabaseAccountArgs
     {
         AccountName = $"pl-{stack}-cosmos-db-account",
@@ -141,7 +141,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         .Apply(result => result.PrimaryMasterKey);
 
     var serviceBusNameSpace = serviceBusNamespace.ServiceBusEndpoint.Apply(s => new Uri(s).Host);
-    var storageConnectionString = StorageConnectionString(resourceGroup, storageAccount);
+    var storageConnectionString = GetStorageConnectionString(storageAccount, resourceGroup);
 
     var webAppName = $"pl-{stack}-function-app";
     var functionApp = new WebApp("pl-function-app", new WebAppArgs
@@ -178,7 +178,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {appInsight, keyVault, cosmosDbAccount, serviceBusNamespace}
     });
 
-    // Create Key Vault assigment metadata reader for azure function
+    // Create Key Vault assignment metadata reader for azure function
     var readerRoleAssignment = new RoleAssignment("4574adae-d926-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -191,7 +191,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault, functionApp}
     });
 
-    // Create Key Vault assigment secret reader for azure function
+    // Create Key Vault assignment secret reader for azure function
     var secretRoleAssignment = new RoleAssignment("539cfc2e-d926-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -204,7 +204,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault, functionApp}
     });
 
-    // Create Key Vault assigment admin reader for current user
+    // Create Key Vault assignment admin reader for current user
     var adminRoleAssignment = new RoleAssignment("801e9dc8-d923-11ed-afa1-0242ac120002", new RoleAssignmentArgs
     {
         PrincipalId = current.ObjectId,
@@ -217,7 +217,7 @@ await Pulumi.Deployment.RunAsync(async () =>
         DependsOn = {keyVault}
     });
 
-    // Create Key Vault assigment admin reader for current user
+    // Create Key Vault assignment admin reader for current user
     var serviceBusRoleAssignment = new RoleAssignment("801e9dc8-d923-11ed-afa1-0242ac120000", new RoleAssignmentArgs
     {
         PrincipalId = functionApp.Identity.Apply(identity => identity.PrincipalId),
@@ -249,7 +249,7 @@ await Pulumi.Deployment.RunAsync(async () =>
     };
 });
 
-static Output<string> StorageConnectionString(ResourceGroup resourceGroup, StorageAccount storageAccount)
+static Output<string> GetStorageConnectionString(StorageAccount storageAccount, ResourceGroup resourceGroup)
 {
     var accessKey = ListStorageAccountKeys.Invoke(new ListStorageAccountKeysInvokeArgs
     {

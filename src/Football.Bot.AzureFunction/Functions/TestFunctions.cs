@@ -5,12 +5,14 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 
 namespace Football.Bot.Functions;
 
-public class TestFunctions
+public static class TestFunctions
 {
     [FunctionName("test")]
-    public IActionResult Test(
+    public static IActionResult Test(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
     {
-        return new OkObjectResult(new {status = "ok", v = 1.2});
+        return new OkObjectResult(new TestResponse(Status: "ok", V: 1.2));
     }
 }
+
+public record TestResponse(string Status, double V);
