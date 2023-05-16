@@ -170,7 +170,8 @@ await Pulumi.Deployment.RunAsync(async () =>
                 new NameValuePairArgs {Name = "KeyVaultEndpoint", Value = keyVault.Properties.Apply(response => response.VaultUri)},
                 new NameValuePairArgs {Name = "AzureWebJobsStorage", Value = storageConnectionString},
                 new NameValuePairArgs {Name = "ServiceBusConnection__fullyQualifiedNamespace", Value = serviceBusNameSpace},
-                new NameValuePairArgs {Name = "Warmup__Url", Value = $"https://{webAppName}.azurewebsites.net"}
+                new NameValuePairArgs {Name = "Warmup__Url", Value = $"https://{webAppName}.azurewebsites.net"},
+                new NameValuePairArgs {Name = "changes", Value = "hardcoded value"},
             }
         }
     }, new CustomResourceOptions

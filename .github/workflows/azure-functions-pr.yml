@@ -8,7 +8,7 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
-
+    name: Run test
     steps:
       - uses: actions/checkout@v2
       - name: Setup dotnet
@@ -19,8 +19,8 @@ jobs:
         run: dotnet restore
       - uses: pulumi/actions@v3
         with:
-          command: dev
-          stack-name: org-name/stack-name
+          command: preview
+          stack-name: dev
           work-dir: ./infrastructure
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -36,3 +36,22 @@ jobs:
           path: TestResults-'${{ env.DOTNET_VERSION }}'
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
+  puluni_validate:
+    runs-on: ubuntu-latest
+    name: Pulumi validate
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: pulumi/actions@v3
+        with:
+          command: preview
+          stack-name: dev
+          work-dir: ./infrastructure
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
