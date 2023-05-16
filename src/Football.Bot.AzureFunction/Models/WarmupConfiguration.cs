@@ -2,5 +2,5 @@
 
 public class WarmupConfiguration
 {
-    public string Url { get; set; }
+    public string Url { get; set; } = null!;
 }

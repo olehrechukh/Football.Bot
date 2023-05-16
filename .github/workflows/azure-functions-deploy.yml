@@ -54,12 +54,13 @@ jobs:
       name: dev
       url: https://t.me/football_serverless_bot
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup dotnet
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+      - name: Setup dotnet ✨
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-      - name: Update azure infrastructure
+      - name: Applying infrastructure 🚀
         uses: pulumi/actions@v4
         with:
           command: up
@@ -73,13 +74,13 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           ARM_SUBSCRIPTION_ID : ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
-      - name: Download artifacts
+      - name: Download artifacts 🛎️
         uses: actions/download-artifact@v2
         with:
           name: build-artifacts
           path: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
 
-      - name: Deploy to ${{ env.name }}
+      - name: Deploy to ${{ env.name }} 🚀
         uses: Azure/functions-action@v1
         with:
           app-name: football.bot-${{ env.name }}
