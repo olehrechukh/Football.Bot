@@ -54,7 +54,13 @@ jobs:
       name: dev
       url: https://t.me/football_serverless_bot
     steps:
-      - uses: pulumi/actions@v4
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Update azure infrastructure
+        uses: pulumi/actions@v4
         with:
           command: up
           stack-name: dev
