@@ -20,7 +20,7 @@ public class HeadersTests
             ["X-Telegram-Bot-Api-Secret-Token"] = new(secret),
         });
 
-        var matchSecretValue = HeadersValidator.MatchSecretValue(headers, secret);
+        var matchSecretValue = HeadersValidator.ContainsSecret(headers, secret);
 
         matchSecretValue.Should().BeTrue();
     }
@@ -36,7 +36,7 @@ public class HeadersTests
             ["X-Telegram-Bot-Api-Secret-Token"] = new(secret),
         });
 
-        var matchSecretValue = HeadersValidator.MatchSecretValue(headers, secret + 1);
+        var matchSecretValue = HeadersValidator.ContainsSecret(headers, secret + 1);
 
         matchSecretValue.Should().BeFalse();
     }
@@ -51,7 +51,7 @@ public class HeadersTests
             ["Accept-Encoding"] = new(new[] {"gzip", "deflate"}),
         });
 
-        var matchSecretValue = HeadersValidator.MatchSecretValue(headers, secret);
+        var matchSecretValue = HeadersValidator.ContainsSecret(headers, secret);
 
         matchSecretValue.Should().BeFalse();
     }

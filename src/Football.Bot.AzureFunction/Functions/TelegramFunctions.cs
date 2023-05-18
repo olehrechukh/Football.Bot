@@ -33,7 +33,7 @@ public class TelegramFunctions
     {
         log.LogInformation("C# HTTP trigger function processed a request");
 
-        if (!MatchSecretValue(req))
+        if (!ValidateSecret(req))
         {
             return new StatusCodeResult(401);
         }
@@ -71,13 +71,13 @@ public class TelegramFunctions
         await commandHandler.Execute(update.Message!);
     }
 
-    private bool MatchSecretValue(HttpRequest req) =>
-        HeadersValidator.MatchSecretValue(req.Headers, telegramConfiguration.Secret);
+    private bool ValidateSecret(HttpRequest req) =>
+        HeadersValidator.ContainsSecret(req.Headers, telegramConfiguration.Secret);
 }
 
 public static class HeadersValidator
 {
-    public static bool MatchSecretValue(IHeaderDictionary headers, string secret) =>
+    public static bool ContainsSecret(IHeaderDictionary headers, string secret) =>
         headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var header) &&
         header.Contains(secret);
 }
