@@ -34,6 +34,7 @@ public class Startup : FunctionsStartup
         builder.Services.AddTransient<CommandHandler>();
         builder.Services.AddTransient<ICommand, NextMatchCommand>();
         builder.Services.AddTransient<ICommand, StartCommand>();
+        builder.Services.AddTransient<ICommand, HelpCommand>();
         builder.Services.AddTransient<ICommand, UnhandledCommand>();
 
         builder.Services.AddSingleton(_ =>
