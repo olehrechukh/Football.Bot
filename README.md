@@ -1,6 +1,6 @@
 # Telegram Bot on Azure function (serverless)
 
-This project is a commercial one aimed at demo Azure services.
+This project is a aimed at demo Azure services.
 
 ## Planning bot
 
